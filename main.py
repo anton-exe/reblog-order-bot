@@ -47,16 +47,15 @@ async def on_ready():
 
     asyncio.get_event_loop().run_forever()
 
-@bot.event
-async def on_command_error(context, error):
-	await context.reply(f"`error <:\n\n{error}`")
+# @bot.event
+# async def on_command_error(context, error):
+# 	await context.reply(f"`error <:[\n\n{error}`")
 
 @bot.before_invoke
 async def log_command(context):
 	print(f"\033[0;44m@{context.author}\033[0m ran \033[0;91m{context.prefix}{context.command}\033[0m in \033[0;44m#{context.channel.name}\033[0m on \033[1m{context.guild.name}\033[0m")
 
-@bot.after_invoke
-async def save_json():
+def save_json():
     data_file = open("data.json", "w")
     data_file.write(json.dumps(data))
     data_file.close()
@@ -65,7 +64,7 @@ async def save_json():
 async def start_thread(context, *, users=commands.parameter(description="the members of the thread (can be ping or ID)", displayed_name="thread_members")):
     message: discord.Message = context.message
     if type(message.channel) != discord.TextChannel:
-        await message.channel.send("`cannot start thread here <:`")
+        await message.channel.send("`cannot start thread here :[`")
         return
 
     args = users.replace("<@", "").replace(">", "").split(" ")
@@ -92,7 +91,7 @@ async def start_thread(context, *, users=commands.parameter(description="the mem
     data[str(thread_id)]["thread_channel"] = thread_channel.id
     data[str(thread_id)]["reblog_url"] = ""
 
-    msg = f"thread {thread_id}\n\norder:>"
+    msg = f"thread {thread_id}\n\norder:"
     for arg in args:
         msg += f"\n<@{arg}>"
     
@@ -107,7 +106,7 @@ async def next_turn(context, *, reblog_url=commands.parameter(default="", displa
         return
 
     if message.author.id != int(data[str(thread_id)]["members"][data[str(thread_id)]["current"]]):
-        await message.channel.send(f"`it's not your turn! >:\n it's currently {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn`")
+        await message.channel.send(f"`it's not your turn! >:[\n it's currently {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn`")
         return
     
     thread_channel = bot.get_channel(data[str(thread_id)]["thread_channel"])
@@ -144,9 +143,10 @@ async def join_thread(context, index:int=commands.parameter(default=-1, descript
     data[str(thread_id)]["members"].insert(index, str(message.author.id))
 
     msg = f"joined thread!\n\nnew order:"
-    for arg in args[1:]:
+    for arg in data[str(thread_id)]["members"]:
         msg += f"\n{message.guild.get_member(int(arg)).display_name}"
     
+    thread_channel = bot.get_channel(data[str(thread_id)]["thread_channel"])
     await thread_channel.send(msg)
 
 async def send_pings():
@@ -155,7 +155,7 @@ async def send_pings():
             thread_channel = bot.get_channel(data[thread_key]["thread_channel"])
             await thread_channel.send(f"`your turn `<@{data[thread_key]['members'][data[thread_key]['current']]}>`!\n`\n{data[thread_key]['reblog_url']}")
             data[thread_key]["last_ping"] = int(datetime.now().timestamp())
-    await save_json()
+    save_json()
 
 
 bot.run(open("TOKEN").read(), log_handler=handler)
