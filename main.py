@@ -47,9 +47,9 @@ async def on_ready():
 
     asyncio.get_event_loop().run_forever()
 
-# @bot.event
-# async def on_command_error(context, error):
-# 	await context.reply(f"`error <:[\n\n{error}`")
+@bot.event
+async def on_command_error(context, error):
+	await context.reply(f"`error <:[\n\n{error}`")
 
 @bot.before_invoke
 async def log_command(context):
@@ -91,7 +91,7 @@ async def start_thread(context, *, users=commands.parameter(description="the mem
     data[str(thread_id)]["thread_channel"] = thread_channel.id
     data[str(thread_id)]["reblog_url"] = ""
 
-    msg = f"thread {thread_id}\n\norder:"
+    msg = f"`thread {thread_id}\n\norder:`"
     for arg in args:
         msg += f"\n<@{arg}>"
     
@@ -106,15 +106,16 @@ async def next_turn(context, *, reblog_url=commands.parameter(default="", displa
         return
 
     if message.author.id != int(data[str(thread_id)]["members"][data[str(thread_id)]["current"]]):
-        await message.channel.send(f"`it's not your turn! >:[\n it's currently {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn`")
-        return
-    
-    thread_channel = bot.get_channel(data[str(thread_id)]["thread_channel"])
+        if "force" in message.content.split(' ')[2:]:
+            await thread_channel.send(f"`force passing {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn...`")
+        else:
+            await message.channel.send(f"`it's not your turn! >:[\n it's currently {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn`")
+            return
 
     data[str(thread_id)]["current"] = (data[str(thread_id)]["current"] + 1) % len(data[str(thread_id)]["members"])
     data[str(thread_id)]["reblog_url"] = reblog_url
 
-    await thread_channel.send(f"`your turn `<@{data[str(thread_id)]['members'][data[str(thread_id)]['current']]}>`!\n`\n{data[str(thread_id)]['reblog_url']}")
+    await message.channel.send(f"`your turn `<@{data[str(thread_id)]['members'][data[str(thread_id)]['current']]}>`!\n`\n{data[str(thread_id)]['reblog_url']}")
     
     data[str(thread_id)]["last_ping"] = int(datetime.now().timestamp())
 
@@ -125,12 +126,10 @@ async def end_thread(context):
     if thread_id == None:
         await message.channel.send("`no thread here`")
         return
-    
-    thread_channel = bot.get_channel(data[str(thread_id)]["thread_channel"])
 
     data.pop(thread_id)
 
-    await thread_channel.send("```interaction ended!```")
+    await message.channel.send("```interaction ended!```")
 
 @bot.command(name="join", brief="join the thread")
 async def join_thread(context, index:int=commands.parameter(default=-1, description="the index to join the reblog order at")):
@@ -140,18 +139,36 @@ async def join_thread(context, index:int=commands.parameter(default=-1, descript
         await message.channel.send("`no thread here`")
         return
     
+    if index < 0:
+        index = len(data[str(thread_id)]["members"]) + index + 1
+
     data[str(thread_id)]["members"].insert(index, str(message.author.id))
 
     msg = f"joined thread!\n\nnew order:"
     for arg in data[str(thread_id)]["members"]:
         msg += f"\n{message.guild.get_member(int(arg)).display_name}"
     
-    thread_channel = bot.get_channel(data[str(thread_id)]["thread_channel"])
-    await thread_channel.send(msg)
+    await message.channel.send('`'+msg+'`')
+
+@bot.command(name="order", brief="show the reblog order")
+async def show_thread_order(context):
+    message: discord.Message = context.message
+    thread_id = get_dict_path(data, message.channel.id)[0]
+    if thread_id == None:
+        await message.channel.send("`no thread here`")
+        return
+    
+    msg = f"order:"
+    for i in range(len(data[str(thread_id)]["members"])):
+        msg += f"\n{str(i).zfill(int(len(data[str(thread_id)]['members'])/10))}. {message.guild.get_member(int(data[str(thread_id)]['members'][i])).display_name}"
+        if i == data[str(thread_id)]["current"]:
+            msg += " <=="
+    
+    await message.channel.send('`'+msg+'`')
 
 async def send_pings():
     for thread_key in list(data.keys()):
-        if data[thread_key]["last_ping"] + 60*60*23 < int(datetime.now().timestamp()):
+        if data[thread_key]["last_ping"] + 60*60*12 < int(datetime.now().timestamp()):
             thread_channel = bot.get_channel(data[thread_key]["thread_channel"])
             await thread_channel.send(f"`your turn `<@{data[thread_key]['members'][data[thread_key]['current']]}>`!\n`\n{data[thread_key]['reblog_url']}")
             data[thread_key]["last_ping"] = int(datetime.now().timestamp())
