@@ -169,8 +169,7 @@ async def show_thread_order(context):
 @bot.command(name="say", brief="say something as rob (admin perm only)")
 async def rob_say(context, *, text=commands.parameter(description="the text to say")):
     message: discord.Message = context.message
-    if message.author.id != 427151562641637376: # allow code author to also use command
-        return
+    # add user check later
     await message.channel.send(text)
     await message.delete()
 
