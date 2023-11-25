@@ -185,7 +185,7 @@ async def rename_thread(context, *, name=commands.parameter(description="new nam
 
 async def send_pings():
     for thread_key in list(data.keys()):
-        if data[thread_key]["last_ping"] + 60*60*12 < int(datetime.now().timestamp()):
+        if data[thread_key]["last_ping"] + 60*60*23 < int(datetime.now().timestamp()):
             thread_channel = bot.get_channel(data[thread_key]["thread_channel"])
             await thread_channel.send(f"`your turn `<@{data[thread_key]['members'][data[thread_key]['current']]}>`!\n`\n{data[thread_key]['reblog_url']}")
             data[thread_key]["last_ping"] = int(datetime.now().timestamp())
