@@ -106,7 +106,7 @@ async def next_turn(context, *, reblog_url=commands.parameter(default="", displa
         return
 
     if message.author.id != int(data[str(thread_id)]["members"][data[str(thread_id)]["current"]]):
-        if "force" in message.content.split(' ')[2:]:
+        if "force" in message.content.split(' ')[1:]:
             await message.channel.send(f"`force passing {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn...`")
         else:
             await message.channel.send(f"`it's not your turn! >:[\n it's currently {message.guild.get_member(int(data[str(thread_id)]['members'][data[str(thread_id)]['current']])).display_name}'s turn`")
