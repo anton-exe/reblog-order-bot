@@ -166,6 +166,23 @@ async def show_thread_order(context):
     
     await message.channel.send('`'+msg+'`')
 
+@bot.command(name="say", brief="say something as rob (admin perm only)")
+async def rob_say(context, *, text=commands.parameter(description="the text to say")):
+    message: discord.Message = context.message
+    if message.author.id != 427151562641637376: # allow code author to also use command
+        return
+    await message.channel.send(text)
+    await message.delete()
+
+@bot.command(name="rename", breif="rename the current thread")
+async def rename_thread(context, *, name=commands.parameter(description="new name")):
+    message: discord.Message = context.message
+    thread_id = get_dict_path(data, message.channel.id)[0]
+    if thread_id == None:
+        await message.channel.send("`no thread here`")
+        return
+    await message.channel.edit(name=name)
+
 async def send_pings():
     for thread_key in list(data.keys()):
         if data[thread_key]["last_ping"] + 60*60*12 < int(datetime.now().timestamp()):
