@@ -173,7 +173,7 @@ async def rob_say(context, *, text=commands.parameter(description="the text to s
     await message.channel.send(text)
     await message.delete()
 
-@bot.command(name="rename", breif="rename the current thread")
+@bot.command(name="rename", brief="rename the current thread")
 async def rename_thread(context, *, name=commands.parameter(description="new name")):
     message: discord.Message = context.message
     thread_id = get_dict_path(data, message.channel.id)[0]
@@ -181,6 +181,17 @@ async def rename_thread(context, *, name=commands.parameter(description="new nam
         await message.channel.send("`no thread here`")
         return
     await message.channel.edit(name=name)
+
+@bot.command(name="reping", brief="immediatelly send the reminder ping for this thread again")
+async def reping(context):
+    message: discord.Message = context.message
+    thread_id = get_dict_path(data, message.channel.id)[0]
+    if thread_id == None:
+        await message.channel.send("`no thread here`")
+        return
+    thread_channel = bot.get_channel(data[thread_id]["thread_channel"])
+    await thread_channel.send(f"`your turn `<@{data[thread_id]['members'][data[thread_id]['current']]}>`!\n`\n{data[thread_id]['reblog_url']}")
+    data[thread_id]["last_ping"] = int(datetime.now().timestamp())
 
 async def send_pings():
     for thread_key in list(data.keys()):
