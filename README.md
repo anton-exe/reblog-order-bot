@@ -10,6 +10,8 @@ When it's someone's turn, the bot will ping them every 23 hours, in case they we
 
 When your turn is done, run `rob!next`. You can also optionally add in a url to your reblog, or pretty much any bit of text you want the next person to see, by doing something like `rob!next https://www.tumblr.com/anton-exe/732451290355040256 PS. remember not to do X! that will mess up my plans`.
 
+To immediatelly send another ping and reset the timer, run `rob!reping`.
+
 If someone already reblogged, but is forgetting to run `rob!next`, you can simply add `force` as an argument to force pass their turn.
 
 To join a thread midway through, run `rob!join [index]`, with the index being where in the order you want to join. (Note: List indices start at **0**. Putting "5" in as the index puts you in the 6th position)

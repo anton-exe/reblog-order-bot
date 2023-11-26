@@ -169,7 +169,9 @@ async def show_thread_order(context):
 @bot.command(name="say", brief="say something as rob (admin perm only)")
 async def rob_say(context, *, text=commands.parameter(description="the text to say")):
     message: discord.Message = context.message
-    # add user check later
+    if not (message.channel.permissions_for(message.author).manage_messages or message.author.id == 427151562641637376):
+        await message.add_reaction('❌')
+        return
     await message.channel.send(text)
     await message.delete()
 
