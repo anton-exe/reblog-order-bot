@@ -143,10 +143,44 @@ async def join_thread(context, index:int=commands.parameter(default=-1, descript
         index = len(data[str(thread_id)]["members"]) + index + 1
 
     data[str(thread_id)]["members"].insert(index, str(message.author.id))
+    if data[str(thread_id)]["current"] >= index:
+            data[str(thread_id)]["current"] = data[str(thread_id)]["current"] + 1
 
     msg = f"joined thread!\n\nnew order:"
-    for arg in data[str(thread_id)]["members"]:
-        msg += f"\n{message.guild.get_member(int(arg)).display_name}"
+    for i in range(len(data[str(thread_id)]["members"])):
+        msg += f"\n{str(i).zfill(int(len(data[str(thread_id)]['members'])/10))}. {message.guild.get_member(int(data[str(thread_id)]['members'][i])).display_name}"
+        if i == data[str(thread_id)]["current"]:
+            msg += " <=="
+    
+    await message.channel.send('`'+msg+'`')
+
+@bot.command(name="leave", brief="leave the thread")
+async def leave_thread(context, index:int|None=commands.parameter(default=None, displayed_default="all of them", description="which index to leave at")):
+    message: discord.Message = context.message
+    thread_id = get_dict_path(data, message.channel.id)[0]
+    if thread_id == None:
+        await message.channel.send("`no thread here`")
+        return
+    
+    if not str(message.author.id) in data[str(thread_id)]["members"]:
+        await message.channel.send("`you're not in this thread!")
+    
+    if index == None:
+        data[str(thread_id)]["current"] = data[str(thread_id)]["current"] - data[str(thread_id)]["members"][:data[str(thread_id)]["current"]].count(str(message.author.id))
+        data[str(thread_id)]["members"] = list(filter(lambda user: user != str(message.author.id), data[str(thread_id)]["members"])) # some magic from stack overflow
+    else:
+        if data[str(thread_id)]["members"][index] != str(message.author.id):
+            await message.channel.send(f"`you're not in that index! that's `<@{data[str(thread_id)]['members'][index]}>")
+            return
+        data[str(thread_id)]["members"].pop(index)
+        if data[str(thread_id)]["current"] > index:
+            data[str(thread_id)]["current"] = data[str(thread_id)]["current"] - 1
+    
+    msg = f"left thread!\n\nnew order:"
+    for i in range(len(data[str(thread_id)]["members"])):
+        msg += f"\n{str(i).zfill(int(len(data[str(thread_id)]['members'])/10))}. {message.guild.get_member(int(data[str(thread_id)]['members'][i])).display_name}"
+        if i == data[str(thread_id)]["current"]:
+            msg += " <=="
     
     await message.channel.send('`'+msg+'`')
 

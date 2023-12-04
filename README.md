@@ -14,7 +14,7 @@ To immediatelly send another ping and reset the timer, run `rob!reping`.
 
 If someone already reblogged, but is forgetting to run `rob!next`, you can simply add `force` as an argument to force pass their turn.
 
-To join a thread midway through, run `rob!join [index]`, with the index being where in the order you want to join. (Note: List indices start at **0**. Putting "5" in as the index puts you in the 6th position)
+To join a thread midway through, run `rob!join [index]`, with the index being where in the order you want to join (Note: List indices start at **0**. Putting "5" in as the index puts you in the 6th position). To leave early, run `rob!leave [index]`.
 
 To check the reblog order, run `rob!order`.
 
