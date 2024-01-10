@@ -153,7 +153,10 @@ async def leave_thread(context, index:int|None=commands.parameter(default=None, 
         await message.channel.send("`you're not in this thread!")
     
     if index == None:
-        data[str(thread_id)]["current"] = data[str(thread_id)]["current"] - data[str(thread_id)]["members"][:data[str(thread_id)]["current"]].count(str(message.author.id))
+        if data[str(thread_id)]["members"][-1] == str(message.author.id) and data[str(thread_id)]["current"] == len(data[str(thread_id)]["members"]) - 1:
+            data[str(thread_id)]["current"] = 0
+        else:
+            data[str(thread_id)]["current"] = data[str(thread_id)]["current"] - data[str(thread_id)]["members"][:data[str(thread_id)]["current"]].count(str(message.author.id))
         data[str(thread_id)]["members"] = list(filter(lambda user: user != str(message.author.id), data[str(thread_id)]["members"])) # some magic from stack overflow
     else:
         if data[str(thread_id)]["members"][index] != str(message.author.id):
