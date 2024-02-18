@@ -196,7 +196,7 @@ async def rob_say(context, *, text=commands.parameter(description="the text to s
     if not (message.channel.permissions_for(message.author).manage_messages or message.author.id == 427151562641637376):
         await message.add_reaction('❌')
         sleep(5)
-        await message.remove_reaction('❌')
+        await message.remove_reaction('❌', bot.user)
         return
     await message.channel.send(text)
     await message.delete()
